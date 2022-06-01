@@ -131,7 +131,6 @@ This process is repeated for each password, key segment pair to fully encrpyt th
 ### Decrypting
 The decryption process is nearly identical. The same key is used on the encrypted password, except the shift direction scheme is reversed. In the decrpytion algorithm, a 0 for the LSB of the direction character in the key segment corresponds to a right shift, and a 1 corresponds to a left shift.
 
-
-
+**Note**: This encryption algorithm is likely not very secure and was created as a fun project to experiment with cryptography. I would not recommend using it for encrypting any really sensitive data (like a password). A more secure algorithm, like AES, could easily be dropped in place of the current algorithm to make this applicaton useable for storing sensitive data. This functionality may be added in future versions.
 
 
