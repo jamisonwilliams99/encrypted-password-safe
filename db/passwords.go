@@ -110,17 +110,22 @@ func RetrievePassword(id int, key string) (string, string, error) {
 	return caesar.Decrypt(encryptedPassword, key), encryptedPassword, nil
 }
 
-// TODO
-func UpdatePassword(id int, oldPassword string, newPassword string, key string) error {
-	return nil
+// TODO - make sure valid id in caller
+func UpdatePassword(id int, newPassword string, key string) error {
+	return db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(passwordsBucket)
+		return b.Put(itob(id), []byte(newPassword))
+	})
 }
 
-// TODO
+// TODO - reorder ids after deletion
 func DeletePassword(id int) error {
-	return nil
+	return db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket(passwordsBucket)
+		return b.Delete(itob(id))
+	})
 }
 
-// TODO
 // returns a list of every password id and what the password is used for
 func AllPasswords() ([]Password, error) {
 	var passwords []Password
