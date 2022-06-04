@@ -112,9 +112,31 @@ func RetrievePassword(id int, key string) (string, string, error) {
 
 // TODO - make sure valid id in caller
 func UpdatePassword(id int, newPassword string, key string) error {
+	var jsonPw []byte
+	encryptedPassword := caesar.Encrypt(newPassword, key)
+
+	// retrieve current password from the db to extract the UsedFor attribute
+	// - should possibly make the retrieving the JSON password routine a function
+	//   since it is used here and in the UpdatePassword function
+	err := db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket(passwordsBucket)
+		jsonPw = b.Get(itob(id))
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	pw, err := decodePassword(jsonPw)
+	usedFor := pw.UsedFor
+
+	// write new password to database
 	return db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket(passwordsBucket)
-		return b.Put(itob(id), []byte(newPassword))
+		jsonPw, err := encodePassword(id, encryptedPassword, usedFor)
+		if err != nil {
+			return err
+		}
+		return b.Put(itob(id), jsonPw)
 	})
 }
 
